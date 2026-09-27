@@ -10,7 +10,6 @@ object NetworkUtils {
       context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
     val activeNetwork = connectivityManager.activeNetwork ?: return false
     val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
-    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-        capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
   }
 }

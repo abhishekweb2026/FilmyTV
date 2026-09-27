@@ -142,7 +142,7 @@ fun ErrorScreen(
           .testTag("settings_button")
       ) {
         Text(
-          text = "Check Network Settings",
+          text = stringResource(R.string.network_settings),
           fontSize = 14.sp
         )
       }

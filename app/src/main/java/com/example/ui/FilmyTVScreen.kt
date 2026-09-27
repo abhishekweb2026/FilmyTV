@@ -74,16 +74,16 @@ fun FilmyTVScreen(
 
   val isOnline = remember { NetworkUtils.isNetworkAvailable(context) }
   var webViewInstance by remember { mutableStateOf<WebView?>(null) }
-  var isLoading by remember { mutableStateOf(isOnline) }
+  var isLoading by remember { mutableStateOf(true) }
   var progressValue by remember { mutableFloatStateOf(0f) }
   var hasNetworkError by remember { mutableStateOf(false) }
   var failingUrl by remember { mutableStateOf<String?>(null) }
 
-  // Offline detection safeguard: If offline and no cached page renders, show offline screen promptly
-  LaunchedEffect(isOnline) {
-    if (!isOnline) {
-      delay(1200)
-      if (isLoading && webViewInstance?.url == null) {
+  // Offline detection safeguard: If device is offline at start and has no cached content, show offline screen promptly
+  LaunchedEffect(Unit) {
+    if (!NetworkUtils.isNetworkAvailable(context)) {
+      delay(1500)
+      if (webViewInstance == null || webViewInstance?.url == null || webViewInstance?.title.isNullOrEmpty()) {
         hasNetworkError = true
         isLoading = false
       }
@@ -310,18 +310,15 @@ fun FilmyTVScreen(
         if (hasNetworkError) {
           ErrorScreen(
             onRetry = {
-              if (NetworkUtils.isNetworkAvailable(context)) {
-                hasNetworkError = false
-                isLoading = true
-                val retryUrl = failingUrl ?: websiteUrl
-                webViewInstance?.loadUrl(retryUrl)
+              hasNetworkError = false
+              isLoading = true
+              val currentUrl = webViewInstance?.url
+              val retryUrl = if (!currentUrl.isNullOrEmpty() && currentUrl != "about:blank") {
+                currentUrl
               } else {
-                Toast.makeText(
-                  context,
-                  context.getString(R.string.offline_title),
-                  Toast.LENGTH_SHORT
-                ).show()
+                websiteUrl
               }
+              webViewInstance?.loadUrl(retryUrl)
             },
             modifier = Modifier
               .fillMaxSize()

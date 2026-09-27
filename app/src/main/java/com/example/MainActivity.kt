@@ -1,5 +1,6 @@
 package com.example
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -20,6 +21,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.ui.FilmyTVScreen
 import com.example.ui.theme.MyApplicationTheme
 
+@SuppressLint("InvalidFragmentVersionForActivityResult")
 class MainActivity : ComponentActivity() {
 
   companion object {

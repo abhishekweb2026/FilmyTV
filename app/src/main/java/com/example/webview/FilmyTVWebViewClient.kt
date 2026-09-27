@@ -217,8 +217,22 @@ class FilmyTVWebViewClient(
   ) {
     super.onReceivedError(view, request, error)
     if (request?.isForMainFrame == true) {
+      val desc = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        error?.description?.toString() ?: ""
+      } else {
+        ""
+      }
+      val errorCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        error?.errorCode ?: 0
+      } else {
+        0
+      }
+      // net::ERR_ABORTED is normal when redirects occur or navigation is superseded
+      if (desc.contains("ERR_ABORTED", ignoreCase = true)) {
+        return
+      }
       val failingUrl = request.url.toString()
-      Log.w(TAG, "Main frame error: ${error?.description} on $failingUrl")
+      Log.w(TAG, "Main frame error: $desc (code $errorCode) on $failingUrl")
       onErrorCallback(failingUrl)
     }
   }
@@ -231,8 +245,9 @@ class FilmyTVWebViewClient(
     failingUrl: String?
   ) {
     super.onReceivedError(view, errorCode, description, failingUrl)
-    Log.w(TAG, "Legacy main frame error: $description on $failingUrl")
-    onErrorCallback(failingUrl)
+    // On API 24+, the modern onReceivedError with WebResourceRequest handles main frame errors.
+    // Do not call onErrorCallback here to avoid subresources (images, ads, tracking scripts)
+    // triggering a full-screen network error.
   }
 
   override fun onReceivedHttpError(
